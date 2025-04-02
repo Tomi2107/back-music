@@ -2,6 +2,8 @@
 FROM maven:3.8.8-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY . .
+RUN mvn dependency:resolve
+RUN mvn dependency:tree
 RUN mvn clean install -DskipTests
 
 # Etapa 2: Ejecución del JAR con una imagen más ligera
