@@ -7,13 +7,12 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.api.core.ApiFuture;
-
 import com.google.firebase.cloud.FirestoreClient; // 🔹 Importación corregida
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
-@RequestMapping("/api/songs")
+@RequestMapping("/api/songs/db") // 🔹 Rutas separadas para evitar conflicto con CancionController
 @CrossOrigin(origins = "*") // CORS para permitir acceso desde el frontend
 public class MusicController {
 
