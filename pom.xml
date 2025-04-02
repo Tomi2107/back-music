@@ -61,14 +61,6 @@
         <version>9.2.0</version>
     </dependency>
 
-    <!-- Firebase Authentication SDK -->
-    <dependency>
-        <groupId>com.google.firebase</groupId>
-        <artifactId>firebase-auth</artifactId>
-        <version>9.1.1</version>
-    </dependency>
-
-
 </dependencies>
 
 	<build>
