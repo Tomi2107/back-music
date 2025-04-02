@@ -39,6 +39,12 @@ public class FirebaseConfig {
 
     @Bean
     public Firestore firestore() throws IOException {
-        return FirestoreClient.getFirestore();
+        System.out.println("🔍 Firebase Apps registradas: " + FirebaseApp.getApps());
+    
+        if (FirebaseApp.getApps().isEmpty()) {
+            throw new IllegalStateException("❌ ERROR: No hay ninguna instancia de Firebase inicializada.");
+        }
+    
+        return FirestoreClient.getFirestore(FirebaseApp.getInstance());
     }
 }
