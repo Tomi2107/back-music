@@ -20,6 +20,9 @@ public class FirebaseConfig {
         // Leer la variable de entorno con el JSON de Firebase
         String firebaseConfigJson = System.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON");
 
+        // Agregar un print para verificar que la variable se está leyendo correctamente
+        System.out.println("🔥 JSON de Firebase: " + firebaseConfigJson);
+
         if (firebaseConfigJson == null || firebaseConfigJson.isEmpty()) {
             throw new IllegalStateException("❌ ERROR: La variable GOOGLE_APPLICATION_CREDENTIALS_JSON no está definida.");
         }
