@@ -1,5 +1,5 @@
 # Etapa 1: Construcción con Maven
-FROM maven:3.8.6-openjdk-17 AS build
+FROM maven:3.8.8-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY . .
 RUN mvn clean install -DskipTests
