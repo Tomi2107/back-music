@@ -1,3 +1,11 @@
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import com.google.cloud.firestore.*;
+import com.google.api.core.ApiFuture;
+import org.springframework.beans.factory.annotation.Autowired;
+
 @RestController
 @RequestMapping("/api/songs")
 @CrossOrigin(origins = "*")  // CORS para permitir el acceso desde el frontend
