@@ -3,9 +3,11 @@ package com.radiozen.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@EnableWebMvc
 public class CorsConfig {
 
     @Bean
@@ -13,9 +15,9 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Aplica CORS a todas las rutas
-                        .allowedOrigins("https://frontmusic.netlify.app") // Permitir solo tu frontend
-                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                registry.addMapping("/api/**") // Solo rutas dentro de /api
+                        .allowedOrigins("https://frontmusic.netlify.app")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }
