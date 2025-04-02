@@ -1,5 +1,4 @@
-
-public @RestController
+@RestController
 @RequestMapping("/api/songs")
 @CrossOrigin(origins = "*")  // CORS para permitir el acceso desde el frontend
 public class MusicController {
@@ -27,7 +26,4 @@ public class MusicController {
         db.collection("songs").document(id).delete();
         return "Song deleted";
     }
-}
- MusicController {
-    
 }
