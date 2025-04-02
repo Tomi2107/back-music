@@ -1,11 +1,12 @@
-# Usa una imagen base de Java
+# Etapa 1: Construcción con Maven
+FROM maven:3.8.6-openjdk-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean install -DskipTests
+
+# Etapa 2: Ejecución del JAR con una imagen más ligera
 FROM openjdk:17-jdk-slim
-
-# Copia tu archivo JAR al contenedor
-COPY target/mi-aplicacion.jar /app.jar
-
-# Expón el puerto en el que la aplicación escuchará
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-
-# Ejecuta la aplicación cuando se inicie el contenedor
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
