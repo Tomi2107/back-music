@@ -74,6 +74,13 @@
         <version>9.2.0</version>
     </dependency>
 
+    <!-- Plugin para empaquetar correctamente -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.1.2</version>  <!-- Usa la versión adecuada -->
+    </dependency>
+		
 </dependencies>
 
 	<build>
