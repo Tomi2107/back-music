@@ -17,34 +17,37 @@ public class FirebaseConfig {
 
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
-        // Leer la variable de entorno con el JSON de Firebase
+        if (!FirebaseApp.getApps().isEmpty()) {
+            System.out.println("✅ Firebase ya estaba inicializado.");
+            return FirebaseApp.getInstance();
+        }
+
         String firebaseConfigJson = System.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON");
 
-        // Agregar un print para verificar que la variable se está leyendo correctamente
         System.out.println("🔥 JSON de Firebase: " + firebaseConfigJson);
 
         if (firebaseConfigJson == null || firebaseConfigJson.isEmpty()) {
             throw new IllegalStateException("❌ ERROR: La variable GOOGLE_APPLICATION_CREDENTIALS_JSON no está definida.");
         }
 
-        // Convertir el JSON a InputStream
         ByteArrayInputStream serviceAccount = new ByteArrayInputStream(firebaseConfigJson.getBytes(StandardCharsets.UTF_8));
 
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build();
 
+        System.out.println("🚀 Inicializando Firebase...");
         return FirebaseApp.initializeApp(options);
     }
 
     @Bean
     public Firestore firestore() throws IOException {
         System.out.println("🔍 Firebase Apps registradas: " + FirebaseApp.getApps());
-    
+
         if (FirebaseApp.getApps().isEmpty()) {
             throw new IllegalStateException("❌ ERROR: No hay ninguna instancia de Firebase inicializada.");
         }
-    
+
         return FirestoreClient.getFirestore(FirebaseApp.getInstance());
     }
 }
