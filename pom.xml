@@ -102,7 +102,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.radiozen.radiozen.RadiozenApplication</mainClass>
+                            <mainClass>com.radiozen.RadiozenApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
