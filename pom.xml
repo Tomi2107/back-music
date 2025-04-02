@@ -95,7 +95,7 @@
             <configuration>
                 <archive>
                     <manifest>
-                        <mainClass>com.radiozen.MainApplication</mainClass>
+                        <mainClass>com.radiozen.RadiozenApplication</mainClass>
                     </manifest>
                 </archive>
             </configuration>
