@@ -58,7 +58,7 @@
     <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>google-cloud-firestore</artifactId>
-        <version>3.14.5</version> <!-- Asegúrate de usar una versión reciente -->
+        <version>3.30.12</version> <!-- Asegúrate de usar una versión reciente -->
     </dependency>
 
     <!-- Spring Boot Starter Data JPA -->
