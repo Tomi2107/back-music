@@ -2,16 +2,27 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import com.google.cloud.firestore.*;
-import com.google.api.core.ApiFuture;
+
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.ApiFuture;
+
+import com.google.firebase.cloud.FirestoreClient; // 🔹 Importación corregida
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/api/songs")
-@CrossOrigin(origins = "*")  // CORS para permitir el acceso desde el frontend
+@CrossOrigin(origins = "*") // CORS para permitir acceso desde el frontend
 public class MusicController {
 
-    private final Firestore db = FirestoreClient.getFirestore();
+    private final Firestore db;
+
+    @Autowired
+    public MusicController() {
+        this.db = FirestoreClient.getFirestore(); // 🔹 Inicialización correcta
+    }
 
     @GetMapping
     public List<Map<String, Object>> getSongs() throws Exception {
