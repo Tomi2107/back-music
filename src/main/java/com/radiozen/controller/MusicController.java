@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.google.cloud.firestore.ApiFuture;
+import com.google.api.core.ApiFuture;
 
 import com.google.firebase.cloud.FirestoreClient; // 🔹 Importación corregida
 
