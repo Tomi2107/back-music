@@ -4,6 +4,7 @@ WORKDIR /app
 COPY . .
 RUN mvn dependency:resolve
 RUN mvn dependency:tree
+RUN mvn dependency:purge-local-repository
 RUN mvn clean install -DskipTests
 
 # Etapa 2: Ejecución del JAR con una imagen más ligera
