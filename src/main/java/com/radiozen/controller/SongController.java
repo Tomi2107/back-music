@@ -72,22 +72,20 @@ public ResponseEntity<String> subirCancionConArchivo(
         @RequestPart("album") String album,
         @RequestPart("año") int año,
         @RequestPart("duracion") String duracion,
-        @RequestPart("genero") String genero,{
+        @RequestPart("genero") String genero,
+        @RequestPart("archivo") MultipartFile archivo) {
 
-    System.out.println("Recibido archivo: " + archivo.getOriginalFilename());
-       @RequestPart("archivo") MultipartFile archivo
-
-    return ResponseEntity.ok("Archivo recibido");
-}
- 
-) {
     try {
+        System.out.println("Recibido archivo: " + archivo.getOriginalFilename());
+
+        // Subir archivo a Firebase
         String nombreArchivo = archivo.getOriginalFilename();
         Bucket bucket = StorageClient.getInstance().bucket();
         Blob blob = bucket.create("songs/" + nombreArchivo, archivo.getBytes(), archivo.getContentType());
 
         String url = String.format("https://storage.googleapis.com/%s/%s", bucket.getName(), blob.getName());
 
+        // Guardar metadatos en Firestore
         Cancion cancion = new Cancion();
         cancion.setTitulo(titulo);
         cancion.setArtista(artista);
