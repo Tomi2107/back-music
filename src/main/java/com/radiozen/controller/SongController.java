@@ -1,10 +1,7 @@
 package com.radiozen.controller;
 
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.*;
-import com.google.firebase.cloud.FirestoreClient;
+import com.google.cloud.firestore.Firestore;
 import com.radiozen.model.Cancion;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -12,42 +9,41 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.QuerySnapshot;
 
 @RestController
 @RequestMapping("/api/songs")
-@CrossOrigin(origins = "https://frontmusic.netlify.app") // Solo permite peticiones del frontend productivo
+@CrossOrigin(origins = "https://frontmusic.netlify.app")
 public class SongController {
 
     private static final Logger logger = LoggerFactory.getLogger(SongController.class);
     private final Firestore db;
 
-    public SongController() {
-        this.db = FirestoreClient.getFirestore();
+    public SongController(Firestore db) {
+        this.db = db;
     }
 
-    // GET /api/songs → lista todas las canciones
     @GetMapping
     public ResponseEntity<List<Cancion>> getSongs() {
         try {
             ApiFuture<QuerySnapshot> future = db.collection("songs").get();
-            List<Cancion> canciones = future.get().toObjects(Cancion.class);
+            List<Cancion> songs = future.get().toObjects(Cancion.class);
 
-            if (canciones == null || canciones.isEmpty()) {
+            if (songs.isEmpty()) {
                 logger.warn("🎵 No se encontraron canciones en Firestore.");
                 return ResponseEntity.noContent().build();
             }
 
-            logger.info("✅ Canciones obtenidas: {}", canciones.size());
-            return ResponseEntity.ok(canciones);
+            logger.info("✅ Canciones obtenidas: {}", songs.size());
+            return ResponseEntity.ok(songs);
 
         } catch (InterruptedException | ExecutionException e) {
             logger.error("❌ Error al obtener canciones:", e);
-            Thread.currentThread().interrupt(); // buena práctica con InterruptedException
             return ResponseEntity.internalServerError().body(null);
         }
     }
 
-    // POST /api/songs → agrega una nueva canción
     @PostMapping
     public ResponseEntity<String> addSong(@RequestBody Cancion cancion) {
         try {
@@ -60,11 +56,10 @@ public class SongController {
         }
     }
 
-    // DELETE /api/songs/{id} → elimina canción por ID del documento Firestore
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSong(@PathVariable String id) {
         try {
-            db.collection("songs").document(id).delete().get(); // Espera la confirmación
+            db.collection("songs").document(id).delete();
             logger.info("🗑️ Canción eliminada con ID: {}", id);
             return ResponseEntity.ok("Canción eliminada.");
         } catch (Exception e) {
@@ -73,9 +68,8 @@ public class SongController {
         }
     }
 
-    // GET /api/songs/ping → para prueba de conexión
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
-        return ResponseEntity.ok("🎧 API RadioZen funcionando correctamente.");
+        return ResponseEntity.ok("🎧 API RadioZen funcionando.");
     }
 }
