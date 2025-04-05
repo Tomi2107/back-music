@@ -65,35 +65,41 @@ public class SongController {
 
     // 🔹 Subir canción con archivo
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> subirCancionConArchivo(
-            @RequestPart("archivo") MultipartFile archivo,
-            @RequestPart("titulo") String titulo,
-            @RequestPart("artista") String artista
-    ) {
-        try {
-            // Subir archivo a Firebase Storage
-            String nombreArchivo = archivo.getOriginalFilename();
-            Bucket bucket = StorageClient.getInstance().bucket();
-            Blob blob = bucket.create("songs/" + nombreArchivo, archivo.getBytes(), archivo.getContentType());
+public ResponseEntity<String> subirCancionConArchivo(
+        @RequestPart("archivo") MultipartFile archivo,
+        @RequestPart("titulo") String titulo,
+        @RequestPart("artista") String artista,
+        @RequestPart("album") String album,
+        @RequestPart("año") String año,
+        @RequestPart("duracion") String duracion,
+        @RequestPart("genero") String genero
+) {
+    try {
+        String nombreArchivo = archivo.getOriginalFilename();
+        Bucket bucket = StorageClient.getInstance().bucket();
+        Blob blob = bucket.create("songs/" + nombreArchivo, archivo.getBytes(), archivo.getContentType());
 
-            // Obtener URL pública del archivo
-            String url = String.format("https://storage.googleapis.com/%s/%s", bucket.getName(), blob.getName());
+        String url = String.format("https://storage.googleapis.com/%s/%s", bucket.getName(), blob.getName());
 
-            // Guardar en Firestore
-            Cancion cancion = new Cancion();
-            cancion.setTitulo(titulo);
-            cancion.setArtista(artista);
-            cancion.setUrl(url);
+        Cancion cancion = new Cancion();
+        cancion.setTitulo(titulo);
+        cancion.setArtista(artista);
+        cancion.setAlbum(album);
+        cancion.setAño(año);
+        cancion.setDuracion(duracion);
+        cancion.setGenero(genero);
+        cancion.setUrl(url);
 
-            db.collection("songs").add(cancion).get();
+        db.collection("songs").add(cancion).get();
 
-            logger.info("✅ Canción subida con archivo: {}", cancion);
-            return ResponseEntity.ok("Canción subida exitosamente con archivo. URL: " + url);
-        } catch (Exception e) {
-            logger.error("❌ Error al subir canción con archivo:", e);
-            return ResponseEntity.internalServerError().body("Error al subir la canción con archivo.");
-        }
+        logger.info("✅ Canción subida con archivo y metadatos: {}", cancion);
+        return ResponseEntity.ok("Canción subida exitosamente con archivo. URL: " + url);
+    } catch (Exception e) {
+        logger.error("❌ Error al subir canción con archivo:", e);
+        return ResponseEntity.internalServerError().body("Error al subir la canción con archivo.");
     }
+}
+
 
     // 🔹 Eliminar canción
     @DeleteMapping("/{id}")
