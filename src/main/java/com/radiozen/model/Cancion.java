@@ -1,18 +1,21 @@
 package com.radiozen.model;
 
 public class Cancion {
+    private String id;         // opcional, para identificar la canción en Firestore
     private String titulo;
     private String artista;
     private String album;
     private int año;
     private String duracion;
     private String genero;
-    private String url;
+    private String url;        // URL del archivo de audio subido
 
-    // Constructor vacío requerido por Firestore
+    // 🔸 Constructor vacío requerido por Firestore
     public Cancion() {}
 
-    public Cancion(String titulo, String artista, String album, int año, String duracion, String genero, String url) {
+    // 🔸 Constructor completo
+    public Cancion(String id, String titulo, String artista, String album, int año, String duracion, String genero, String url) {
+        this.id = id;
         this.titulo = titulo;
         this.artista = artista;
         this.album = album;
@@ -22,7 +25,11 @@ public class Cancion {
         this.url = url;
     }
 
-    // Getters y Setters
+    // 🔸 Getters y Setters
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
 
