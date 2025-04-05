@@ -16,18 +16,17 @@ import java.nio.charset.StandardCharsets;
 @Configuration
 public class FirebaseInitializer {
 
-    // 🔥 Este método se ejecuta automáticamente cuando arranca la app
     @PostConstruct
     public void initFirebase() {
         try {
-            // ✅ Leé las credenciales desde una variable de entorno
-            String firebaseConfig = System.getenv("FIREBASE_CONFIG");
+            // 🔄 Leer la variable de entorno desde Render
+            String firebaseConfigJson = System.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON");
 
-            if (firebaseConfig == null || firebaseConfig.isEmpty()) {
-                throw new IllegalStateException("La variable de entorno FIREBASE_CONFIG no está definida.");
+            if (firebaseConfigJson == null || firebaseConfigJson.isEmpty()) {
+                throw new IllegalStateException("La variable de entorno GOOGLE_APPLICATION_CREDENTIALS_JSON no está definida.");
             }
 
-            ByteArrayInputStream serviceAccount = new ByteArrayInputStream(firebaseConfig.getBytes(StandardCharsets.UTF_8));
+            ByteArrayInputStream serviceAccount = new ByteArrayInputStream(firebaseConfigJson.getBytes(StandardCharsets.UTF_8));
 
             FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
@@ -38,11 +37,11 @@ public class FirebaseInitializer {
             }
 
         } catch (IOException e) {
+            System.err.println("❌ Error al inicializar Firebase:");
             e.printStackTrace();
         }
     }
 
-    // 🔧 Bean para inyectar Firestore donde lo necesites
     @Bean
     public Firestore firestore() {
         return FirestoreClient.getFirestore();
