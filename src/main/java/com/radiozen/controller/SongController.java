@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/songs")
-@CrossOrigin(origins = "https://frontmusic.netlify.app") // 🔒 Solo permite peticiones del frontend productivo
+@CrossOrigin(origins = "https://frontmusic.netlify.app") // Solo permite peticiones del frontend productivo
 public class SongController {
 
     private static final Logger logger = LoggerFactory.getLogger(SongController.class);
@@ -30,18 +30,19 @@ public class SongController {
     public ResponseEntity<List<Cancion>> getSongs() {
         try {
             ApiFuture<QuerySnapshot> future = db.collection("songs").get();
-            List<Cancion> songs = future.get().toObjects(Cancion.class);
+            List<Cancion> canciones = future.get().toObjects(Cancion.class);
 
-            if (songs.isEmpty()) {
+            if (canciones == null || canciones.isEmpty()) {
                 logger.warn("🎵 No se encontraron canciones en Firestore.");
                 return ResponseEntity.noContent().build();
             }
 
-            logger.info("✅ Canciones obtenidas: {}", songs.size());
-            return ResponseEntity.ok(songs);
+            logger.info("✅ Canciones obtenidas: {}", canciones.size());
+            return ResponseEntity.ok(canciones);
 
         } catch (InterruptedException | ExecutionException e) {
             logger.error("❌ Error al obtener canciones:", e);
+            Thread.currentThread().interrupt(); // buena práctica con InterruptedException
             return ResponseEntity.internalServerError().body(null);
         }
     }
@@ -63,7 +64,7 @@ public class SongController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSong(@PathVariable String id) {
         try {
-            db.collection("songs").document(id).delete();
+            db.collection("songs").document(id).delete().get(); // Espera la confirmación
             logger.info("🗑️ Canción eliminada con ID: {}", id);
             return ResponseEntity.ok("Canción eliminada.");
         } catch (Exception e) {
@@ -72,9 +73,9 @@ public class SongController {
         }
     }
 
-    // BONUS: GET de prueba
+    // GET /api/songs/ping → para prueba de conexión
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
-        return ResponseEntity.ok("🎧 API RadioZen funcionando.");
+        return ResponseEntity.ok("🎧 API RadioZen funcionando correctamente.");
     }
 }
