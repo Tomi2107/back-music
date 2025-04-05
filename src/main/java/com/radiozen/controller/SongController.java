@@ -11,11 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
-    System.out.println("Recibido archivo: " + archivo.getOriginalFilename());
-import org.springframework.web.bind.annotation{
-    return ResponseEntity.ok("Archivo recibido");
-}
+import org.springframework.web.bind.annotation
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -76,9 +72,14 @@ public ResponseEntity<String> subirCancionConArchivo(
         @RequestPart("album") String album,
         @RequestPart("año") int año,
         @RequestPart("duracion") String duracion,
-        @RequestPart("genero") String genero,
-        @RequestPart("archivo") MultipartFile archivo
+        @RequestPart("genero") String genero,{
 
+    System.out.println("Recibido archivo: " + archivo.getOriginalFilename());
+       @RequestPart("archivo") MultipartFile archivo
+
+    return ResponseEntity.ok("Archivo recibido");
+}
+ 
 ) {
     try {
         String nombreArchivo = archivo.getOriginalFilename();
