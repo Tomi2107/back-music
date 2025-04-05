@@ -5,6 +5,9 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
+import com.google.firebase.cloud.StorageClient;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,6 +37,7 @@ public class FirebaseConfig {
 
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .setStorageBucket(System.getenv("FIREBASE_STORAGE_BUCKET")) // Asegúrate de tener esta variable
                 .build();
 
         System.out.println("🚀 Inicializando Firebase...");
@@ -45,7 +49,17 @@ public class FirebaseConfig {
     @Bean
     public Firestore firestore(FirebaseApp firebaseApp) {
         System.out.println("🔍 Firebase Apps registradas: " + FirebaseApp.getApps());
-
         return FirestoreClient.getFirestore(firebaseApp);
     }
-}
+
+    @Bean
+    public Bucket firebaseBucket(FirebaseApp firebaseApp) {
+        return StorageClient.getInstance(firebaseApp).bucket();
+    }
+
+    @Bean
+    public Storage firebaseStorage(FirebaseApp firebaseApp) {
+        return StorageClient.getInstance(firebaseApp).bucket().getStorage();
+    }
+} 
+
