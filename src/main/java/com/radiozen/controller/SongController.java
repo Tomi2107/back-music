@@ -6,24 +6,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.QuerySnapshot;
 
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 @RestController
 @RequestMapping("/api/songs")
-@CrossOrigin(origins = "https://frontmusic.netlify.app")
+@CrossOrigin(origins = "https://frontmusic.netlify.app") // 🔒 Solo permite peticiones del frontend productivo
 public class SongController {
 
     private static final Logger logger = LoggerFactory.getLogger(SongController.class);
+
+    // 🔸 Inyectamos Firestore como un bean
     private final Firestore db;
 
     public SongController(Firestore db) {
         this.db = db;
     }
 
+    // GET /api/songs → lista todas las canciones
     @GetMapping
     public ResponseEntity<List<Cancion>> getSongs() {
         try {
@@ -44,6 +47,7 @@ public class SongController {
         }
     }
 
+    // POST /api/songs → agrega una nueva canción
     @PostMapping
     public ResponseEntity<String> addSong(@RequestBody Cancion cancion) {
         try {
@@ -56,6 +60,7 @@ public class SongController {
         }
     }
 
+    // DELETE /api/songs/{id} → elimina canción por ID del documento Firestore
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSong(@PathVariable String id) {
         try {
@@ -68,6 +73,7 @@ public class SongController {
         }
     }
 
+    // BONUS: GET de prueba
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
         return ResponseEntity.ok("🎧 API RadioZen funcionando.");
