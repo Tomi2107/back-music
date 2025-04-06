@@ -5,7 +5,7 @@ public class Cancion {
     private String titulo;
     private String artista;
     private String album;
-    private int año;
+    private int anio;
     private String duracion;
     private String genero;
     private String url;        // URL del archivo de audio subido
@@ -14,12 +14,12 @@ public class Cancion {
     public Cancion() {}
 
     // 🔸 Constructor completo
-    public Cancion(String id, String titulo, String artista, String album, int año, String duracion, String genero, String url) {
+    public Cancion(String id, String titulo, String artista, String album, int anio, String duracion, String genero, String url) {
         this.id = id;
         this.titulo = titulo;
         this.artista = artista;
         this.album = album;
-        this.año = año;
+        this.anio = anio;
         this.duracion = duracion;
         this.genero = genero;
         this.url = url;
@@ -39,8 +39,8 @@ public class Cancion {
     public String getAlbum() { return album; }
     public void setAlbum(String album) { this.album = album; }
 
-    public int getAño() { return año; }
-    public void setAño(int año) { this.año = año; }
+    public int getAnio() { return anio; }
+    public void setAnio(int anio) { this.anio = anio; }
 
     public String getDuracion() { return duracion; }
     public void setDuracion(String duracion) { this.duracion = duracion; }
