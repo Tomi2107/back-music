@@ -72,14 +72,14 @@ public class SongController {
     }
 
     // 🔹 Subir canción con archivo
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/upload",  consumes = "multipart/form-data")
 public ResponseEntity<String> subirCancionConArchivo(
-        @RequestPart("titulo") String titulo,
-        @RequestPart("artista") String artista,
-        @RequestPart("album") String album,
-        @RequestPart("anio") int anio,
-        @RequestPart("duracion") String duracion,
-        @RequestPart("genero") String genero,
+        @RequestParam("titulo") String titulo,
+        @RequestParam("artista") String artista,
+        @RequestParam("album") String album,
+        @RequestParam("anio") String anio,
+        @RequestParam("duracion") String duracion,
+        @RequestParam("genero") String genero
         @RequestPart("archivo") MultipartFile archivo) {
 
     try {
