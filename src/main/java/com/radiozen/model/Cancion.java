@@ -14,7 +14,7 @@ public class Cancion {
     public Cancion() {}
 
     // 🔸 Constructor completo
-    public Cancion(String id, String titulo, String artista, String album, string anio, String duracion, String genero, String url) {
+    public Cancion(String id, String titulo, String artista, String album, String anio, String duracion, String genero, String url) {
         this.id = id;
         this.titulo = titulo;
         this.artista = artista;
