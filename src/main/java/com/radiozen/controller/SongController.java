@@ -77,7 +77,7 @@ public ResponseEntity<String> subirCancionConArchivo(
         @RequestPart("titulo") String titulo,
         @RequestPart("artista") String artista,
         @RequestPart("album") String album,
-        @RequestPart("año") int año,
+        @RequestPart("año") int anio,
         @RequestPart("duracion") String duracion,
         @RequestPart("genero") String genero,
         @RequestPart("archivo") MultipartFile archivo) {
@@ -97,7 +97,7 @@ public ResponseEntity<String> subirCancionConArchivo(
         cancion.setTitulo(titulo);
         cancion.setArtista(artista);
         cancion.setAlbum(album);
-        cancion.setAño(año);
+        cancion.setAnio(anio);
         cancion.setDuracion(duracion);
         cancion.setGenero(genero);
         cancion.setUrl(url);
