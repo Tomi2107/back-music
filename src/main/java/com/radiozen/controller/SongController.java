@@ -79,7 +79,7 @@ public ResponseEntity<String> subirCancionConArchivo(
         @RequestParam("album") String album,
         @RequestParam("anio") String anio,
         @RequestParam("duracion") String duracion,
-        @RequestParam("genero") String genero
+        @RequestParam("genero") String genero,
         @RequestPart("archivo") MultipartFile archivo) {
 
     try {
