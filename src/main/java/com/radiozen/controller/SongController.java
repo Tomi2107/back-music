@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
-@RequestMapping("/api/songs")
 @CrossOrigin(origins = "https://frontmusic.netlify.app") // Ajustá esto si usás otro frontend
+@RequestMapping("/api/songs")
 public class SongController {
 
     private static final Logger logger = LoggerFactory.getLogger(SongController.class);
