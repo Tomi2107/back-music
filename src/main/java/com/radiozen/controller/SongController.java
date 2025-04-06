@@ -76,7 +76,7 @@ public class SongController {
     }
 
     // 🔹 Subir canción con archivo
-    @PostMapping(value = "/upload",  consumes = "multipart/form-data")
+   @PostMapping(value = "/upload", consumes = "multipart/form-data")
 public ResponseEntity<String> subirCancionConArchivo(
         @RequestParam("titulo") String titulo,
         @RequestParam("artista") String artista,
@@ -86,17 +86,34 @@ public ResponseEntity<String> subirCancionConArchivo(
         @RequestParam("genero") String genero,
         @RequestPart("archivo") MultipartFile archivo) {
 
+    logger.info("📥 Petición recibida para subir canción:");
+    logger.info("➡️ Título: {}", titulo);
+    logger.info("➡️ Artista: {}", artista);
+    logger.info("➡️ Álbum: {}", album);
+    logger.info("➡️ Año: {}", anio);
+    logger.info("➡️ Duración: {}", duracion);
+    logger.info("➡️ Género: {}", genero);
+    logger.info("➡️ Archivo recibido: {}", archivo != null ? archivo.getOriginalFilename() : "null");
+
     try {
-        System.out.println("Recibido archivo: " + archivo.getOriginalFilename());
+        if (archivo == null || archivo.isEmpty()) {
+            logger.warn("⚠️ El archivo es nulo o está vacío");
+            return ResponseEntity.badRequest().body("Archivo no enviado o vacío.");
+        }
 
         // Subir archivo a Firebase
         String nombreArchivo = archivo.getOriginalFilename();
-        Bucket bucket = StorageClient.getInstance().bucket();
-        Blob blob = bucket.create("songs/" + nombreArchivo, archivo.getBytes(), archivo.getContentType());
+        logger.info("📤 Subiendo archivo: {}", nombreArchivo);
 
+        Bucket bucket = StorageClient.getInstance().bucket();
+        logger.info("🪣 Bucket: {}", bucket.getName());
+
+        Blob blob = bucket.create("songs/" + nombreArchivo, archivo.getBytes(), archivo.getContentType());
         String url = String.format("https://storage.googleapis.com/%s/%s", bucket.getName(), blob.getName());
 
-        // Guardar metadatos en Firestore
+        logger.info("✅ Archivo subido correctamente. URL: {}", url);
+
+        // Guardar metadatos
         Cancion cancion = new Cancion();
         cancion.setTitulo(titulo);
         cancion.setArtista(artista);
@@ -108,11 +125,12 @@ public ResponseEntity<String> subirCancionConArchivo(
 
         db.collection("songs").add(cancion).get();
 
-        logger.info("✅ Canción subida con archivo y metadatos: {}", cancion);
+        logger.info("✅ Canción guardada con metadatos: {}", cancion);
         return ResponseEntity.ok("Canción subida exitosamente con archivo. URL: " + url);
+
     } catch (Exception e) {
         logger.error("❌ Error al subir canción con archivo:", e);
-        return ResponseEntity.internalServerError().body("Error al subir la canción con archivo.");
+        return ResponseEntity.internalServerError().body("Error interno: " + e.getMessage());
     }
 }
 
