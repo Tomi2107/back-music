@@ -93,7 +93,8 @@ public class SongController {
 
             Files.copy(archivo.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
 
-            String localUrl = "/api/songs/audio/" + filename;
+            String baseUrl = "https://back-music-3izh.onrender.com";  // O sacalo de una variable de entorno
+            String localUrl = baseUrl + "/api/songs/audio/" + filename;
             Cancion cancion = new Cancion(titulo, artista, album, anio, duracion, genero, localUrl);
 
             db.collection("songs").add(cancion).get();
