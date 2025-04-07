@@ -42,21 +42,28 @@ public class SongController {
     public ResponseEntity<List<Cancion>> getSongs() {
         try {
             ApiFuture<QuerySnapshot> future = db.collection("songs").get();
-            List<Cancion> songs = future.get().toObjects(Cancion.class);
-
+            List<Cancion> songs = new ArrayList<>();
+    
+            for (var doc : future.get().getDocuments()) {
+                Cancion c = doc.toObject(Cancion.class);
+                c.setId(doc.getId()); // 🔥 Guardamos el ID
+                songs.add(c);
+            }
+    
             if (songs.isEmpty()) {
                 logger.warn("🎵 No se encontraron canciones.");
                 return ResponseEntity.noContent().build();
             }
-
+    
             logger.info("✅ Canciones encontradas: {}", songs.size());
             return ResponseEntity.ok(songs);
-
+    
         } catch (InterruptedException | ExecutionException e) {
             logger.error("❌ Error al obtener canciones:", e);
             return ResponseEntity.internalServerError().body(null);
         }
     }
+
 
     @PostMapping
     public ResponseEntity<String> addSong(@RequestBody Cancion cancion) {
