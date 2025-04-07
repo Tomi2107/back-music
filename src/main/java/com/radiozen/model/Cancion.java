@@ -11,7 +11,15 @@ public class Cancion {
     private String url;        // URL del archivo de audio subido
 
     // 🔸 Constructor vacío requerido por Firestore
-    public Cancion() {}
+    public Cancion() {}public Cancion(String titulo, String artista, String album, String anio, String duracion, String genero, String url) {
+    this.titulo = titulo;
+    this.artista = artista;
+    this.album = album;
+    this.anio = anio;
+    this.duracion = duracion;
+    this.genero = genero;
+    this.url = url;
+}
 
     // 🔸 Constructor completo
     public Cancion(String id, String titulo, String artista, String album, String anio, String duracion, String genero, String url) {
