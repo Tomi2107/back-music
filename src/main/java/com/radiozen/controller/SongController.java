@@ -29,12 +29,20 @@ public class SongController {
     private final Cloudinary cloudinary;
 
     public SongController(Firestore db) {
-        this.db = db;
-        this.cloudinary = new Cloudinary(System.getenv("CLOUDINARY_URL"));
+    this.db = db;
 
-        File uploadDir = new File(UPLOAD_DIR);
-        if (!uploadDir.exists()) uploadDir.mkdirs();
+    String cloudinaryUrl = System.getenv("CLOUDINARY_URL");
+
+    if (cloudinaryUrl == null || cloudinaryUrl.isBlank()) {
+        throw new IllegalStateException("❌ CLOUDINARY_URL no está definida. Verificá tus variables de entorno en Render.");
     }
+
+    this.cloudinary = new Cloudinary(cloudinaryUrl);
+
+    File uploadDir = new File(UPLOAD_DIR);
+    if (!uploadDir.exists()) uploadDir.mkdirs();
+}
+
 
     @GetMapping
     public ResponseEntity<List<Cancion>> getSongs() {
