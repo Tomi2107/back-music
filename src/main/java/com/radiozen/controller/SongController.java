@@ -23,6 +23,21 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+
+private final Cloudinary cloudinary;
+
+public SongController(Firestore db) {
+    this.db = db;
+
+    // Inicializamos Cloudinary con la URL de entorno
+    this.cloudinary = new Cloudinary(System.getenv("CLOUDINARY_URL"));
+
+    File uploadDir = new File(UPLOAD_DIR);
+    if (!uploadDir.exists()) uploadDir.mkdirs();
+}
+
 @RestController
 @CrossOrigin(origins = "https://frontmusic.netlify.app")
 @RequestMapping("/api/songs")
