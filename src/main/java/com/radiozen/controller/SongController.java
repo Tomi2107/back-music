@@ -95,65 +95,45 @@ public class SongController {
 
     // 🔹 Subida con archivo local
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> subirCancionConArchivo(
-            @RequestParam("titulo") String titulo,
-            @RequestParam("artista") String artista,
-            @RequestParam("album") String album,
-            @RequestParam("anio") String anio,
-            @RequestParam("duracion") String duracion,
-            @RequestParam("genero") String genero,
-            @RequestPart("archivo") MultipartFile archivo) {
+public ResponseEntity<String> subirCancionConArchivo(
+        @RequestParam("titulo") String titulo,
+        @RequestParam("artista") String artista,
+        @RequestParam("album") String album,
+        @RequestParam("anio") String anio,
+        @RequestParam("duracion") String duracion,
+        @RequestParam("genero") String genero,
+        @RequestPart("archivo") MultipartFile archivo) {
 
-        logger.info("📥 Petición recibida para subir canción local:");
-        try {
-            if (archivo == null || archivo.isEmpty()) {
-                logger.warn("⚠️ El archivo es nulo o está vacío");
-                return ResponseEntity.badRequest().body("Archivo no enviado o vacío.");
-            }
+    logger.info("📥 Petición recibida para subir canción a Cloudinary:");
 
-            String filename = UUID.randomUUID() + "_" + archivo.getOriginalFilename();
-            Path filepath = Paths.get(UPLOAD_DIR, filename);
-
-            Files.copy(archivo.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
-
-            String baseUrl = "https://back-music-3izh.onrender.com";  // O sacalo de una variable de entorno
-            String localUrl = baseUrl + "/api/songs/audio/" + filename;
-            Cancion cancion = new Cancion(titulo, artista, album, anio, duracion, genero, localUrl);
-
-            db.collection("songs").add(cancion).get();
-
-            logger.info("✅ Canción guardada local con URL: {}", localUrl);
-            return ResponseEntity.ok("Canción subida exitosamente. URL: " + localUrl);
-
-        } catch (Exception e) {
-            logger.error("❌ Error al subir canción:", e);
-            return ResponseEntity.internalServerError().body("Error interno: " + e.getMessage());
+    try {
+        if (archivo == null || archivo.isEmpty()) {
+            logger.warn("⚠️ El archivo es nulo o está vacío");
+            return ResponseEntity.badRequest().body("Archivo no enviado o vacío.");
         }
+
+        // Subir archivo a Cloudinary como raw (audio)
+        Map uploadResult = cloudinary.uploader().upload(archivo.getBytes(),
+                ObjectUtils.asMap(
+                        "resource_type", "raw", // para MP3, WAV, etc.
+                        "folder", "songs"
+                ));
+
+        String cloudinaryUrl = (String) uploadResult.get("secure_url");
+
+        Cancion cancion = new Cancion(titulo, artista, album, anio, duracion, genero, cloudinaryUrl);
+        db.collection("songs").add(cancion).get();
+
+        logger.info("✅ Canción subida a Cloudinary: {}", cloudinaryUrl);
+        return ResponseEntity.ok("Canción subida exitosamente. URL: " + cloudinaryUrl);
+
+    } catch (Exception e) {
+        logger.error("❌ Error al subir canción:", e);
+        return ResponseEntity.internalServerError().body("Error interno: " + e.getMessage());
     }
+}
 
-    // 🔹 Servir archivos
-    @GetMapping("/audio/{filename:.+}")
-    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-        try {
-            Path file = Paths.get(UPLOAD_DIR).resolve(filename).normalize();
-            Resource resource = new UrlResource(file.toUri());
-
-            if (!resource.exists()) {
-                logger.warn("🛑 Archivo no encontrado: {}", filename);
-                return ResponseEntity.notFound().build();
-            }
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(resource);
-
-        } catch (MalformedURLException e) {
-            logger.error("❌ Error al servir archivo:", e);
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSong(@PathVariable String id) {
         try {
