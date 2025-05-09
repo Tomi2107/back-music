@@ -17,6 +17,9 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+import org.springframework.beans.factory.annotation.Value;
+
+
 @RestController
 @CrossOrigin(origins = "https://frontmusic.netlify.app")
 @RequestMapping("/api/songs")
@@ -27,20 +30,18 @@ public class SongController {
 
     private final Firestore db;
     private final Cloudinary cloudinary;
-
-    public SongController(Firestore db) {
-    this.db = db;
-
-    String cloudinaryUrl = System.getenv("CLOUDINARY_URL");
-
-    if (cloudinaryUrl == null || cloudinaryUrl.isBlank()) {
-        throw new IllegalStateException("❌ CLOUDINARY_URL no está definida. Verificá tus variables de entorno en Render.");
-    }
-
-    this.cloudinary = new Cloudinary(cloudinaryUrl);
-
-    File uploadDir = new File(UPLOAD_DIR);
-    if (!uploadDir.exists()) uploadDir.mkdirs();
+    
+    public SongController(Firestore db, @Value("${cloudinary.url}") String cloudinaryUrl) {
+        this.db = db;
+    
+        if (cloudinaryUrl == null || cloudinaryUrl.isBlank()) {
+            throw new IllegalStateException("❌ CLOUDINARY_URL no está definida. Verificá tus variables de entorno en Render.");
+        }
+    
+        this.cloudinary = new Cloudinary(cloudinaryUrl);
+    
+        File uploadDir = new File(UPLOAD_DIR);
+        if (!uploadDir.exists()) uploadDir.mkdirs();
 }
 
 
