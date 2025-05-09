@@ -92,8 +92,7 @@ public class SongController {
                 return ResponseEntity.badRequest().body("Archivo no enviado o vacío.");
             }
 
-            // Subir a Cloudinary
-            Map<?, ?> uploadResult = cloudinary.uploader().upload(archivo.getBytes(),
+            Map uploadResult = cloudinary.uploader().upload(archivo.getBytes(),
                     ObjectUtils.asMap(
                             "resource_type", "raw",
                             "folder", "songs"
