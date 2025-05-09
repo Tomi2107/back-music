@@ -1,42 +1,21 @@
 package com.radiozen.controller;
 
-import java.util.ArrayList;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.radiozen.model.Cancion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.*;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
-
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
-
-private final Cloudinary cloudinary;
-
-public SongController(Firestore db) {
-    this.db = db;
-
-    // Inicializamos Cloudinary con la URL de entorno
-    this.cloudinary = new Cloudinary(System.getenv("CLOUDINARY_URL"));
-
-    File uploadDir = new File(UPLOAD_DIR);
-    if (!uploadDir.exists()) uploadDir.mkdirs();
-}
 
 @RestController
 @CrossOrigin(origins = "https://frontmusic.netlify.app")
@@ -47,9 +26,12 @@ public class SongController {
     private static final String UPLOAD_DIR = "uploads";
 
     private final Firestore db;
+    private final Cloudinary cloudinary;
 
     public SongController(Firestore db) {
         this.db = db;
+        this.cloudinary = new Cloudinary(System.getenv("CLOUDINARY_URL"));
+
         File uploadDir = new File(UPLOAD_DIR);
         if (!uploadDir.exists()) uploadDir.mkdirs();
     }
@@ -59,27 +41,26 @@ public class SongController {
         try {
             ApiFuture<QuerySnapshot> future = db.collection("songs").get();
             List<Cancion> songs = new ArrayList<>();
-    
+
             for (var doc : future.get().getDocuments()) {
                 Cancion c = doc.toObject(Cancion.class);
-                c.setId(doc.getId()); // 🔥 Guardamos el ID
+                c.setId(doc.getId());
                 songs.add(c);
             }
-    
+
             if (songs.isEmpty()) {
                 logger.warn("🎵 No se encontraron canciones.");
                 return ResponseEntity.noContent().build();
             }
-    
+
             logger.info("✅ Canciones encontradas: {}", songs.size());
             return ResponseEntity.ok(songs);
-    
+
         } catch (InterruptedException | ExecutionException e) {
             logger.error("❌ Error al obtener canciones:", e);
             return ResponseEntity.internalServerError().body(null);
         }
     }
-
 
     @PostMapping
     public ResponseEntity<String> addSong(@RequestBody Cancion cancion) {
@@ -93,47 +74,45 @@ public class SongController {
         }
     }
 
-    // 🔹 Subida con archivo local
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public ResponseEntity<String> subirCancionConArchivo(
-        @RequestParam("titulo") String titulo,
-        @RequestParam("artista") String artista,
-        @RequestParam("album") String album,
-        @RequestParam("anio") String anio,
-        @RequestParam("duracion") String duracion,
-        @RequestParam("genero") String genero,
-        @RequestPart("archivo") MultipartFile archivo) {
+    public ResponseEntity<String> subirCancionConArchivo(
+            @RequestParam("titulo") String titulo,
+            @RequestParam("artista") String artista,
+            @RequestParam("album") String album,
+            @RequestParam("anio") String anio,
+            @RequestParam("duracion") String duracion,
+            @RequestParam("genero") String genero,
+            @RequestPart("archivo") MultipartFile archivo) {
 
-    logger.info("📥 Petición recibida para subir canción a Cloudinary:");
+        logger.info("📥 Petición recibida para subir canción a Cloudinary:");
 
-    try {
-        if (archivo == null || archivo.isEmpty()) {
-            logger.warn("⚠️ El archivo es nulo o está vacío");
-            return ResponseEntity.badRequest().body("Archivo no enviado o vacío.");
+        try {
+            if (archivo == null || archivo.isEmpty()) {
+                logger.warn("⚠️ El archivo es nulo o está vacío");
+                return ResponseEntity.badRequest().body("Archivo no enviado o vacío.");
+            }
+
+            // Subir a Cloudinary
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(archivo.getBytes(),
+                    ObjectUtils.asMap(
+                            "resource_type", "raw",
+                            "folder", "songs"
+                    ));
+
+            String cloudinaryUrl = (String) uploadResult.get("secure_url");
+
+            Cancion cancion = new Cancion(titulo, artista, album, anio, duracion, genero, cloudinaryUrl);
+            db.collection("songs").add(cancion).get();
+
+            logger.info("✅ Canción subida a Cloudinary: {}", cloudinaryUrl);
+            return ResponseEntity.ok("Canción subida exitosamente. URL: " + cloudinaryUrl);
+
+        } catch (Exception e) {
+            logger.error("❌ Error al subir canción:", e);
+            return ResponseEntity.internalServerError().body("Error interno: " + e.getMessage());
         }
-
-        // Subir archivo a Cloudinary como raw (audio)
-        Map uploadResult = cloudinary.uploader().upload(archivo.getBytes(),
-                ObjectUtils.asMap(
-                        "resource_type", "raw", // para MP3, WAV, etc.
-                        "folder", "songs"
-                ));
-
-        String cloudinaryUrl = (String) uploadResult.get("secure_url");
-
-        Cancion cancion = new Cancion(titulo, artista, album, anio, duracion, genero, cloudinaryUrl);
-        db.collection("songs").add(cancion).get();
-
-        logger.info("✅ Canción subida a Cloudinary: {}", cloudinaryUrl);
-        return ResponseEntity.ok("Canción subida exitosamente. URL: " + cloudinaryUrl);
-
-    } catch (Exception e) {
-        logger.error("❌ Error al subir canción:", e);
-        return ResponseEntity.internalServerError().body("Error interno: " + e.getMessage());
     }
-}
 
-    
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSong(@PathVariable String id) {
         try {
