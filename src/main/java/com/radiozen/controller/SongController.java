@@ -5,13 +5,10 @@ import com.cloudinary.utils.ObjectUtils;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.radiozen.model.Cancion;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,7 +31,7 @@ public class SongController {
         this.db = db;
 
         if (cloudinaryUrl == null || cloudinaryUrl.isBlank()) {
-            throw new IllegalStateException("❌ CLOUDINARY_URL no está definida. Verificá tus variables de entorno.");
+            throw new IllegalStateException("❌ CLOUDINARY_URL no está definida. Verificá tus variables de entorno en Render.");
         }
 
         this.cloudinary = new Cloudinary(cloudinaryUrl);
@@ -65,7 +62,7 @@ public class SongController {
 
         } catch (InterruptedException | ExecutionException e) {
             logger.error("❌ Error al obtener canciones:", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.internalServerError().body(null);
         }
     }
 
@@ -91,11 +88,11 @@ public class SongController {
             @RequestParam("genero") String genero,
             @RequestPart("archivo") MultipartFile archivo) {
 
-        logger.info("📥 Petición recibida para subir canción a Cloudinary");
+        logger.info("📥 Petición recibida para subir canción a Cloudinary:");
 
         try {
             if (archivo == null || archivo.isEmpty()) {
-                logger.warn("⚠️ Archivo no enviado o vacío");
+                logger.warn("⚠️ El archivo es nulo o está vacío");
                 return ResponseEntity.badRequest().body("Archivo no enviado o vacío.");
             }
 
@@ -108,46 +105,51 @@ public class SongController {
             String cloudinaryUrl = (String) uploadResult.get("secure_url");
             String publicId = (String) uploadResult.get("public_id");
 
-            Cancion cancion = new Cancion(titulo, artista, album, anio, duracion, genero, cloudinaryUrl);
-            cancion.setPublicId(publicId); // 💡 Para poder borrar después
+            Map<String, Object> cancionMap = new HashMap<>();
+            cancionMap.put("titulo", titulo);
+            cancionMap.put("artista", artista);
+            cancionMap.put("album", album);
+            cancionMap.put("anio", anio);
+            cancionMap.put("duracion", duracion);
+            cancionMap.put("genero", genero);
+            cancionMap.put("url", cloudinaryUrl);
+            cancionMap.put("public_id", publicId); // ⬅️ Necesario para eliminar
 
-            db.collection("songs").add(cancion).get();
+            db.collection("songs").add(cancionMap).get();
 
-            logger.info("✅ Canción subida: {}", cloudinaryUrl);
+            logger.info("✅ Canción subida a Cloudinary: {}", cloudinaryUrl);
             return ResponseEntity.ok("Canción subida exitosamente. URL: " + cloudinaryUrl);
 
         } catch (Exception e) {
             logger.error("❌ Error al subir canción:", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error interno: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Error interno: " + e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteSong(@PathVariable String id) {
+    public ResponseEntity<?> deleteSong(@PathVariable String id) {
         try {
             DocumentReference docRef = db.collection("songs").document(id);
             DocumentSnapshot document = docRef.get().get();
 
             if (!document.exists()) {
-                logger.warn("❌ Canción no encontrada: {}", id);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Canción no encontrada.");
             }
 
-            String publicId = document.getString("publicId"); // 👈 Este debe coincidir con el campo en la clase Cancion
+            String publicId = document.getString("public_id");
 
+            // ⬇️ Borrar de Cloudinary si tiene public_id
             if (publicId != null && !publicId.isBlank()) {
-                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-                logger.info("🗑️ Archivo eliminado de Cloudinary: {}", publicId);
+                Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+                logger.info("🗑️ Resultado de borrado en Cloudinary: {}", result);
             }
 
+            // ⬇️ Borrar de Firestore
             docRef.delete();
-            logger.info("🗑️ Canción eliminada de Firestore: {}", id);
-
-            return ResponseEntity.ok("Canción eliminada.");
+            return ResponseEntity.ok("Canción eliminada exitosamente.");
 
         } catch (Exception e) {
-            logger.error("❌ Error al eliminar canción:", e);
+            logger.error("❌ Error al eliminar la canción:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al eliminar la canción.");
         }
@@ -155,6 +157,6 @@ public class SongController {
 
     @GetMapping("/ping")
     public ResponseEntity<String> ping() {
-        return ResponseEntity.ok("🎧 API RadioZen funcionando correctamente.");
+        return ResponseEntity.ok("🎧 API RadioZen funcionando.");
     }
 }
