@@ -1,28 +1,32 @@
 package com.radiozen.model;
 
 public class Cancion {
-    private String id;         // opcional, para identificar la canción en Firestore
+    private String id;         // ID en Firestore (asignado manualmente desde el controller)
     private String titulo;
     private String artista;
     private String album;
     private String anio;
     private String duracion;
     private String genero;
-    private String url;        // URL del archivo de audio subido
+    private String url;        // URL del archivo en Cloudinary
+    private String public_id;  // 🔸 Para poder borrar la canción de Cloudinary
 
     // 🔸 Constructor vacío requerido por Firestore
-    public Cancion() {}public Cancion(String titulo, String artista, String album, String anio, String duracion, String genero, String url) {
-    this.titulo = titulo;
-    this.artista = artista;
-    this.album = album;
-    this.anio = anio;
-    this.duracion = duracion;
-    this.genero = genero;
-    this.url = url;
-}
+    public Cancion() {}
 
-    // 🔸 Constructor completo
-    public Cancion(String id, String titulo, String artista, String album, String anio, String duracion, String genero, String url) {
+    // 🔸 Constructor sin ID ni public_id (para crear nueva canción)
+    public Cancion(String titulo, String artista, String album, String anio, String duracion, String genero, String url) {
+        this.titulo = titulo;
+        this.artista = artista;
+        this.album = album;
+        this.anio = anio;
+        this.duracion = duracion;
+        this.genero = genero;
+        this.url = url;
+    }
+
+    // 🔸 Constructor completo (útil para debugging o respuesta completa)
+    public Cancion(String id, String titulo, String artista, String album, String anio, String duracion, String genero, String url, String public_id) {
         this.id = id;
         this.titulo = titulo;
         this.artista = artista;
@@ -31,6 +35,7 @@ public class Cancion {
         this.duracion = duracion;
         this.genero = genero;
         this.url = url;
+        this.public_id = public_id;
     }
 
     // 🔸 Getters y Setters
@@ -58,4 +63,7 @@ public class Cancion {
 
     public String getUrl() { return url; }
     public void setUrl(String url) { this.url = url; }
+
+    public String getPublic_id() { return public_id; }
+    public void setPublic_id(String public_id) { this.public_id = public_id; }
 }
