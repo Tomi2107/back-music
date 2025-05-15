@@ -140,8 +140,9 @@ public class SongController {
 
             // ⬇️ Borrar de Cloudinary si tiene public_id
             if (publicId != null && !publicId.isBlank()) {
-                Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-                logger.info("🗑️ Resultado de borrado en Cloudinary: {}", result);
+                Map result = cloudinary.uploader().destroy(publicId, ObjectUtils.asMap(
+                    "resource_type", "raw"
+                ));                logger.info("🗑️ Resultado de borrado en Cloudinary: {}", result);
             }
 
             // ⬇️ Borrar de Firestore
